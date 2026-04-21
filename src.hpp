@@ -15,8 +15,6 @@ class Expect {
     bool res = pred();
     if (negate) res = !res;
     ok = ok && res;
-    // reset negate for subsequent calls
-    negate = false;
     return *this;
   }
 
@@ -35,11 +33,22 @@ class Expect {
     return apply([&]() { return value == y; });
   }
 
-  // Membership: y is std::vector<TLike>
-  template <typename U>
-  Expect& toBeOneOf(const std::vector<U>& vec) {
+  // Membership: accept any iterable range (including std::vector and initializer lists)
+  template <typename R>
+  Expect& toBeOneOf(const R& range) {
     return apply([&]() {
-      for (const auto& z : vec) {
+      for (const auto& z : range) {
+        if (value == z) return true;
+      }
+      return false;
+    });
+  }
+
+  // Overload for braced initializer lists
+  template <typename U>
+  Expect& toBeOneOf(std::initializer_list<U> list) {
+    return apply([&]() {
+      for (const auto& z : list) {
         if (value == z) return true;
       }
       return false;
@@ -73,4 +82,3 @@ class Expect {
 
 template <typename T>
 Expect<T> expect(const T& v) { return Expect<T>(v); }
-
