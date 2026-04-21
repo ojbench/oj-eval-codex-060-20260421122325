@@ -55,6 +55,16 @@ class Expect {
     });
   }
 
+  // Overload where list element type is exactly T
+  Expect& toBeOneOf(std::initializer_list<T> list) {
+    return apply([&]() {
+      for (const auto& z : list) {
+        if (value == z) return true;
+      }
+      return false;
+    });
+  }
+
   // Comparators
   template <typename U>
   Expect& le(const U& y) {
